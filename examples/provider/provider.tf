@@ -20,7 +20,7 @@ variable "GBi" {
 # There are two options for YTsaurus provider configuration:
 # - cluster - YTsaurus cluster's fqdn
 # - token - Admin's token
-# 
+#
 # For security reasons do not store 'token' option in .tf file.
 # Instead, the 'token' should be stored in $HOME/.yt/token file with the appropriate file permissions.
 
@@ -32,12 +32,12 @@ provider "ytsaurus" {
 # And out two developers, Alisa and Denis, are going to use YTsaurus for it.
 # Let's create YTsaurus objects for Mr.Cat project with terraform.
 
-# # First we will create a group 'mrcat'
+# First we will create a group 'mrcat'
 resource "ytsaurus_group" "mrcat_main_group" {
   name = "mrcat"
 }
 
-# # And users for Alisa and Denis
+# And users for Alisa and Denis
 resource "ytsaurus_user" "mrcat_alisa" {
   name = "alisa"
   member_of = [
@@ -100,10 +100,16 @@ resource "ytsaurus_account" "mrcat_account" {
   }
 }
 
+# Since map_nodes store data, you can add the lifecycle/prevent_destroy terraform's option just in case.
+
 resource "ytsaurus_map_node" "mrcat_home" {
   path        = "//home/mrdir"
   account     = ytsaurus_account.mrcat_account.name
   acl = var.acl_mrcat_full_access
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Alisa wants a very fast Key-Value storage to improve web app's user experience.
