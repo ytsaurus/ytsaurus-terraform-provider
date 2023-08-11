@@ -3,14 +3,14 @@
 page_title: "ytsaurus_account Resource - ytsaurus"
 subcategory: ""
 description: |-
-  Accounts are used to control and share cluster's resources between users.
+  Accounts are used to control and share the cluster's resources between users.
   More information:
   https://ytsaurus.tech/docs/en/user-guide/storage/accounts
 ---
 
 # ytsaurus_account (Resource)
 
-Accounts are used to control and share cluster's resources between users.
+Accounts are used to control and share the cluster's resources between users.
 
 More information:
 https://ytsaurus.tech/docs/en/user-guide/storage/accounts
@@ -22,31 +22,31 @@ https://ytsaurus.tech/docs/en/user-guide/storage/accounts
 
 ### Required
 
-- `name` (String) YTsaurus account name.
-- `resource_limits` (Attributes) Resource limits for the account. (see [below for nested schema](#nestedatt--resource_limits))
+- `name` (String) YTsaurus account name
+- `resource_limits` (Attributes) Resource limits for the account (see [below for nested schema](#nestedatt--resource_limits))
 
 ### Optional
 
-- `acl` (Attributes List) A list of ACE records. More information: https://ytsaurus.tech/docs/en/user-guide/storage/access-control. (see [below for nested schema](#nestedatt--acl))
-- `parent_name` (String) Parent account name.
+- `acl` (Attributes List) A list of ACE records. More information: https://ytsaurus.tech/docs/en/user-guide/storage/access-control (see [below for nested schema](#nestedatt--acl))
+- `parent_name` (String) Parent account name
 
 ### Read-Only
 
-- `id` (String) ObjectID in YTsaurus cluster, can be found in object's @id attribute.
+- `id` (String) ObjectID in YTsaurus cluster, can be found in object's @id attribute
 
 <a id="nestedatt--resource_limits"></a>
 ### Nested Schema for `resource_limits`
 
 Required:
 
-- `chunk_count` (Number) Number of chunks.
-- `disk_space_per_medium` (Map of Number) Disk space in bytes (for each medium).
-- `node_count` (Number) Number of Cypress nodes.
+- `chunk_count` (Number) Number of chunks
+- `disk_space_per_medium` (Map of Number) Disk space in bytes (for each medium)
+- `node_count` (Number) Number of Cypress nodes
 
 Optional:
 
-- `tablet_count` (Number) Number of tablets.
-- `tablet_static_memory` (Number) Memory volume for dynamic tables loaded into memory.
+- `tablet_count` (Number) Number of tablets
+- `tablet_static_memory` (Number) Memory volume for dynamic tables loaded into memory
 
 
 <a id="nestedatt--acl"></a>
@@ -57,23 +57,23 @@ Required:
 - `action` (String) Either allow (allowing entry) or deny (denying entry).
 - `permissions` (Set of String) A list of access types also called permissions.
 Supported permissions:
-  - read - Means reading a value or getting information about an object or its attributes.
-  - write - Means changing an object state or its attributes.
-  - use - Applies to accounts, pools, and bundles and means usage (that is, the ability to insert new objects into the quota of a given account, run operations in a pool, or move a dynamic table to a bundle).
-  - administer - Means changing the object access descriptor.
-  - create - Applies only to schemas and means creating objects of this type.
-  - remove - Means removing an object.
-  - mount - Means mounting, unmounting, remounting, and resharding a dynamic table.
-  - manage - Applies only to operations (not to Cypress nodes) and means managing that operation or its jobs.
+  - read - Means reading a value or getting information about an object or its attributes
+  - write - Means changing an object's state or its attributes
+  - use - Applies to accounts, pools, and bundles and means usage (that is, the ability to insert new objects into the quota of a given account, run operations in a pool, or move a dynamic table to a bundle)
+  - administer - Means changing the object access descriptor
+  - create - Applies only to schemas and means creating objects of this type
+  - remove - Means removing an object
+  - mount - Means mounting, unmounting, remounting, and resharding a dynamic table
+  - manage - Applies only to operations (not to Cypress nodes) and means managing that operation or its jobs
 - `subjects` (Set of String) A list of names of subjects (users or groups) to which the entry applies.
 
 Optional:
 
 - `inheritance_mode` (String) The inheritance mode of this ACE, by default.
 Can be:
-  - object_only - The object_only value means that this entry affects only the object itself.
-  - object_and_descendants - The object_and_descendants value means that this entry affects the object and all its descendants, including indirect ones.
+  - object_only - The object_only value means that this entry affects only the object itself
+  - object_and_descendants - The object_and_descendants value means that this entry affects the object and all its descendants, including indirect ones
   - descendants_only - The descendants_only value means that this entry affects only descendants, including indirect ones. 
-  - immediate_descendants_only - The immediate_descendants_only value means that this entry affects only direct descendants (sons).
+  - immediate_descendants_only - The immediate_descendants_only value means that this entry affects only direct descendants (sons)
 
 

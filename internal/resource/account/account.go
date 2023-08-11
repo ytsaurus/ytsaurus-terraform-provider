@@ -127,7 +127,7 @@ func (r *accountResource) Configure(_ context.Context, req resource.ConfigureReq
 func (r *accountResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: `
-Accounts are used to control and share cluster's resources between users.
+Accounts are used to control and share the cluster's resources between users.
 
 More information:
 https://ytsaurus.tech/docs/en/user-guide/storage/accounts
@@ -136,11 +136,11 @@ https://ytsaurus.tech/docs/en/user-guide/storage/accounts
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
-				Description: "ObjectID in YTsaurus cluster, can be found in object's @id attribute.",
+				Description: "ObjectID in YTsaurus cluster, can be found in object's @id attribute",
 			},
 			"name": schema.StringAttribute{
 				Required:    true,
-				Description: "YTsaurus account name.",
+				Description: "YTsaurus account name",
 			},
 			"acl": schema.ListNestedAttribute{
 				Optional:     true,
@@ -148,23 +148,23 @@ https://ytsaurus.tech/docs/en/user-guide/storage/accounts
 				PlanModifiers: []planmodifier.List{
 					listplanmodifier.UseStateForUnknown(),
 				},
-				Description: "A list of ACE records. More information: https://ytsaurus.tech/docs/en/user-guide/storage/access-control.",
+				Description: "A list of ACE records. More information: https://ytsaurus.tech/docs/en/user-guide/storage/access-control",
 			},
 			"parent_name": schema.StringAttribute{
 				Optional:    true,
-				Description: "Parent account name.",
+				Description: "Parent account name",
 			},
 			"resource_limits": schema.SingleNestedAttribute{
 				Required:    true,
-				Description: "Resource limits for the account.",
+				Description: "Resource limits for the account",
 				Attributes: map[string]schema.Attribute{
 					"node_count": schema.Int64Attribute{
 						Required:    true,
-						Description: "Number of Cypress nodes.",
+						Description: "Number of Cypress nodes",
 					},
 					"chunk_count": schema.Int64Attribute{
 						Required:    true,
-						Description: "Number of chunks.",
+						Description: "Number of chunks",
 					},
 					"tablet_count": schema.Int64Attribute{
 						Optional: true,
@@ -173,7 +173,7 @@ https://ytsaurus.tech/docs/en/user-guide/storage/accounts
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
 						},
-						Description: "Number of tablets.",
+						Description: "Number of tablets",
 					},
 					"tablet_static_memory": schema.Int64Attribute{
 						Optional: true,
@@ -182,12 +182,12 @@ https://ytsaurus.tech/docs/en/user-guide/storage/accounts
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
 						},
-						Description: "Memory volume for dynamic tables loaded into memory.",
+						Description: "Memory volume for dynamic tables loaded into memory",
 					},
 					"disk_space_per_medium": schema.MapAttribute{
 						Required:    true,
 						ElementType: types.Int64Type,
-						Description: "Disk space in bytes (for each medium).",
+						Description: "Disk space in bytes (for each medium)",
 					},
 				},
 				PlanModifiers: []planmodifier.Object{

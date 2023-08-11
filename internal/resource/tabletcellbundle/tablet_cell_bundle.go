@@ -147,7 +147,7 @@ https://ytsaurus.tech/docs/en/user-guide/dynamic-tables/concepts`,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
-				Description: "ObjectID in YTsaurus cluster, can be found in object's @id attribute.",
+				Description: "ObjectID in the YTsaurus cluster, can be found in an object's @id attribute.",
 			},
 			"name": schema.StringAttribute{
 				Required:    true,
@@ -190,7 +190,7 @@ https://ytsaurus.tech/docs/en/user-guide/dynamic-tables/concepts`,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
 						},
-						Description: "Minimal number of changelog's replicas to consider the changelog was successfully written.",
+						Description: "Minimum number of changelog's replicas to consider the changelog successfully written.",
 					},
 					"changelog_read_quorum": schema.Int64Attribute{
 						Optional: true,
@@ -199,7 +199,7 @@ https://ytsaurus.tech/docs/en/user-guide/dynamic-tables/concepts`,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
 						},
-						Description: "Minimal available replica count such that the changelog can be read.",
+						Description: "Minimum available replica count such that the changelog can be read.",
 					},
 					"changelog_replication_factor": schema.Int64Attribute{
 						Optional: true,

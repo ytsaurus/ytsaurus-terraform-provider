@@ -149,6 +149,7 @@ resource "ytsaurus_tablet_cell_bundle" "mrcat_tcb" {
 
 resource "ytsaurus_scheduler_pool" "mrcat_main_pool" {
   name = "mrcat_main"
+  pool_tree = "default"
   max_running_operation_count = 10
   max_operation_count = 10
 

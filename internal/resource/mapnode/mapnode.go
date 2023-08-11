@@ -71,7 +71,7 @@ func (r *mapNodeResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
-				Description: "ObjectID in YTsaurus cluster, can be found in object's @id attribute.",
+				Description: "ObjectID in the YTsaurus cluster, can be found in object's @id attribute.",
 			},
 			"path": schema.StringAttribute{
 				Required:    true,
@@ -92,7 +92,7 @@ func (r *mapNodeResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Enable or disable ACL inheritance from object's parents.",
+				Description: "Enable or disable ACL inheritance from an object's parents.",
 			},
 			"acl": schema.ListNestedAttribute{
 				Optional:     true,

@@ -147,14 +147,14 @@ func (r *mediumResource) Configure(_ context.Context, req resource.ConfigureRequ
 func (r *mediumResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: `
-Different media types (HDD, SDD, RAM) are logically combined in special entities referred to as media.
+Different media types (HDD, SDD, RAM) are logically combined into special entities referred to as media.
 
 More information:
 https://ytsaurus.tech/docs/en/user-guide/storage/media`,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
-				Description: "ObjectID in YTsaurus cluster, can be found in object's @id attribute.",
+				Description: "ObjectID in the YTsaurus cluster, can be found in an object's @id attribute.",
 			},
 			"name": schema.StringAttribute{
 				Required:    true,
@@ -211,7 +211,7 @@ https://ytsaurus.tech/docs/en/user-guide/storage/media`,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
 						},
-						Description: "Maximum replicas to store in a rack.",
+						Description: "Maximum number of replicas to store in a rack.",
 					},
 					"max_replication_factor": schema.Int64Attribute{
 						Optional: true,
@@ -220,7 +220,7 @@ https://ytsaurus.tech/docs/en/user-guide/storage/media`,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
 						},
-						Description: "Maximum replication_factor for the medium.",
+						Description: "Maximum replication factor for the medium.",
 					},
 					"prefer_local_host_for_dynamic_tables": schema.BoolAttribute{
 						Optional: true,
@@ -229,7 +229,7 @@ https://ytsaurus.tech/docs/en/user-guide/storage/media`,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
 						},
-						Description: "Prefer to store dynamic_tables data on local disks.",
+						Description: "Prefer to store dynamic table data on local disks.",
 					},
 				},
 				PlanModifiers: []planmodifier.Object{

@@ -33,7 +33,7 @@ https://ytsaurus.tech/docs/en/user-guide/dynamic-tables/concepts
 
 ### Read-Only
 
-- `id` (String) ObjectID in YTsaurus cluster, can be found in object's @id attribute.
+- `id` (String) ObjectID in the YTsaurus cluster, can be found in an object's @id attribute.
 
 <a id="nestedatt--options"></a>
 ### Nested Schema for `options`
@@ -47,9 +47,9 @@ Required:
 
 Optional:
 
-- `changelog_read_quorum` (Number) Minimal available replica count such that the changelog can be read.
+- `changelog_read_quorum` (Number) Minimum available replica count such that the changelog can be read.
 - `changelog_replication_factor` (Number) How many replicas should be stored for the changelog.
-- `changelog_write_quorum` (Number) Minimal number of changelog's replicas to consider the changelog was successfully written.
+- `changelog_write_quorum` (Number) Minimum number of changelog's replicas to consider the changelog successfully written.
 - `snapshot_replication_factor` (Number) How many replicas should be stored for the snapshot.
 
 
@@ -61,23 +61,23 @@ Required:
 - `action` (String) Either allow (allowing entry) or deny (denying entry).
 - `permissions` (Set of String) A list of access types also called permissions.
 Supported permissions:
-  - read - Means reading a value or getting information about an object or its attributes.
-  - write - Means changing an object state or its attributes.
-  - use - Applies to accounts, pools, and bundles and means usage (that is, the ability to insert new objects into the quota of a given account, run operations in a pool, or move a dynamic table to a bundle).
-  - administer - Means changing the object access descriptor.
-  - create - Applies only to schemas and means creating objects of this type.
-  - remove - Means removing an object.
-  - mount - Means mounting, unmounting, remounting, and resharding a dynamic table.
-  - manage - Applies only to operations (not to Cypress nodes) and means managing that operation or its jobs.
+  - read - Means reading a value or getting information about an object or its attributes
+  - write - Means changing an object's state or its attributes
+  - use - Applies to accounts, pools, and bundles and means usage (that is, the ability to insert new objects into the quota of a given account, run operations in a pool, or move a dynamic table to a bundle)
+  - administer - Means changing the object access descriptor
+  - create - Applies only to schemas and means creating objects of this type
+  - remove - Means removing an object
+  - mount - Means mounting, unmounting, remounting, and resharding a dynamic table
+  - manage - Applies only to operations (not to Cypress nodes) and means managing that operation or its jobs
 - `subjects` (Set of String) A list of names of subjects (users or groups) to which the entry applies.
 
 Optional:
 
 - `inheritance_mode` (String) The inheritance mode of this ACE, by default.
 Can be:
-  - object_only - The object_only value means that this entry affects only the object itself.
-  - object_and_descendants - The object_and_descendants value means that this entry affects the object and all its descendants, including indirect ones.
+  - object_only - The object_only value means that this entry affects only the object itself
+  - object_and_descendants - The object_and_descendants value means that this entry affects the object and all its descendants, including indirect ones
   - descendants_only - The descendants_only value means that this entry affects only descendants, including indirect ones. 
-  - immediate_descendants_only - The immediate_descendants_only value means that this entry affects only direct descendants (sons).
+  - immediate_descendants_only - The immediate_descendants_only value means that this entry affects only direct descendants (sons)
 
 

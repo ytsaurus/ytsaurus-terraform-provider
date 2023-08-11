@@ -3,7 +3,7 @@
 page_title: "ytsaurus_group Resource - ytsaurus"
 subcategory: ""
 description: |-
-  Groups are containers for both users and other groups and mainly are used as an ACL subjects.
+  Groups are containers for both users and other groups and are mainly used as ACL subjects.
   More information:
   https://ytsaurus.tech/docs/en/user-guide/storage/access-control#users_groups
   Attention!
@@ -12,7 +12,7 @@ description: |-
 
 # ytsaurus_group (Resource)
 
-Groups are containers for both users and other groups and mainly are used as an ACL subjects. 
+Groups are containers for both users and other groups and are mainly used as ACL subjects. 
 
 More information:
 https://ytsaurus.tech/docs/en/user-guide/storage/access-control#users_groups
@@ -31,6 +31,6 @@ https://ytsaurus.tech/docs/en/user-guide/storage/access-control#users_groups
 
 ### Read-Only
 
-- `id` (String) ObjectID in YTsaurus cluster, can be found in object's @id attribute.
+- `id` (String) ObjectID in the YTsaurus cluster, can be found in an object's @id attribute.
 
 

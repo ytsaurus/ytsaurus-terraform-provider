@@ -239,7 +239,7 @@ func (r *schedulerPoolResource) Schema(_ context.Context, _ resource.SchemaReque
 	burstGuaranteeResources.Description = ""
 
 	resourceLimits := schedulerPoolResourcesSchema
-	resourceLimits.Description = "The resource_limits option describes the limits on different resources of a given pool."
+	resourceLimits.Description = "The resource_limits option describes limits for different resources in a given pool."
 
 	resp.Schema = schema.Schema{
 		Description: `
@@ -253,7 +253,7 @@ https://ytsaurus.tech/docs/en/user-guide/data-processing/scheduler/pool-settings
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
-				Description: "ObjectID in YTsaurus cluster, can be found in object's @id attribute.",
+				Description: "ObjectID in the YTsaurus cluster, can be found in an object's @id attribute.",
 			},
 			"name": schema.StringAttribute{
 				Required:    true,
@@ -276,14 +276,14 @@ https://ytsaurus.tech/docs/en/user-guide/data-processing/scheduler/pool-settings
 				Validators: []validator.String{
 					stringvalidator.LengthAtLeast(1),
 				},
-				Description: "A name of parent pool in the same pool_tree.",
+				Description: "A name of the parent pool in the same pool_tree.",
 			},
 			"max_running_operation_count": schema.Int64Attribute{
 				Optional: true,
 				Validators: []validator.Int64{
 					int64validator.AtLeast(minMaxRunningOperationCount),
 				},
-				Description: "Maximum number of operations in running state.",
+				Description: "Maximum number of operations in the running state.",
 			},
 			"max_operation_count": schema.Int64Attribute{
 				Optional: true,

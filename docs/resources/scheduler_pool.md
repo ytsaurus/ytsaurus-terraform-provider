@@ -35,16 +35,16 @@ https://ytsaurus.tech/docs/en/user-guide/data-processing/scheduler/pool-settings
 - `forbid_immediate_operations` (Boolean) Prohibits the start of operations directly in the given pool; does not apply to starting operations in subpools.
 - `integral_guarantees` (Attributes) Integral guarantees configuration. More information: https://ytsaurus.tech/docs/en/user-guide/data-processing/scheduler/integral-guarantees. (see [below for nested schema](#nestedatt--integral_guarantees))
 - `max_operation_count` (Number) Maximum number of operations in all states.
-- `max_running_operation_count` (Number) Maximum number of operations in running state.
+- `max_running_operation_count` (Number) Maximum number of operations in the running state.
 - `mode` (String) The scheduling mode. Can be 'fifo' or 'fair_share'.
-- `parent_name` (String) A name of parent pool in the same pool_tree.
-- `resource_limits` (Attributes) The resource_limits option describes the limits on different resources of a given pool. (see [below for nested schema](#nestedatt--resource_limits))
+- `parent_name` (String) A name of the parent pool in the same pool_tree.
+- `resource_limits` (Attributes) The resource_limits option describes limits for different resources in a given pool. (see [below for nested schema](#nestedatt--resource_limits))
 - `strong_guarantee_resources` (Attributes) The pool's guaranteed resources. (see [below for nested schema](#nestedatt--strong_guarantee_resources))
 - `weight` (Number) A real non-negative number, which is responsible for the proportion in which the subtree should be provided with the resources of the parent pool.
 
 ### Read-Only
 
-- `id` (String) ObjectID in YTsaurus cluster, can be found in object's @id attribute.
+- `id` (String) ObjectID in the YTsaurus cluster, can be found in an object's @id attribute.
 
 <a id="nestedatt--acl"></a>
 ### Nested Schema for `acl`
@@ -54,24 +54,24 @@ Required:
 - `action` (String) Either allow (allowing entry) or deny (denying entry).
 - `permissions` (Set of String) A list of access types also called permissions.
 Supported permissions:
-  - read - Means reading a value or getting information about an object or its attributes.
-  - write - Means changing an object state or its attributes.
-  - use - Applies to accounts, pools, and bundles and means usage (that is, the ability to insert new objects into the quota of a given account, run operations in a pool, or move a dynamic table to a bundle).
-  - administer - Means changing the object access descriptor.
-  - create - Applies only to schemas and means creating objects of this type.
-  - remove - Means removing an object.
-  - mount - Means mounting, unmounting, remounting, and resharding a dynamic table.
-  - manage - Applies only to operations (not to Cypress nodes) and means managing that operation or its jobs.
+  - read - Means reading a value or getting information about an object or its attributes
+  - write - Means changing an object's state or its attributes
+  - use - Applies to accounts, pools, and bundles and means usage (that is, the ability to insert new objects into the quota of a given account, run operations in a pool, or move a dynamic table to a bundle)
+  - administer - Means changing the object access descriptor
+  - create - Applies only to schemas and means creating objects of this type
+  - remove - Means removing an object
+  - mount - Means mounting, unmounting, remounting, and resharding a dynamic table
+  - manage - Applies only to operations (not to Cypress nodes) and means managing that operation or its jobs
 - `subjects` (Set of String) A list of names of subjects (users or groups) to which the entry applies.
 
 Optional:
 
 - `inheritance_mode` (String) The inheritance mode of this ACE, by default.
 Can be:
-  - object_only - The object_only value means that this entry affects only the object itself.
-  - object_and_descendants - The object_and_descendants value means that this entry affects the object and all its descendants, including indirect ones.
+  - object_only - The object_only value means that this entry affects only the object itself
+  - object_and_descendants - The object_and_descendants value means that this entry affects the object and all its descendants, including indirect ones
   - descendants_only - The descendants_only value means that this entry affects only descendants, including indirect ones. 
-  - immediate_descendants_only - The immediate_descendants_only value means that this entry affects only direct descendants (sons).
+  - immediate_descendants_only - The immediate_descendants_only value means that this entry affects only direct descendants (sons)
 
 
 <a id="nestedatt--integral_guarantees"></a>

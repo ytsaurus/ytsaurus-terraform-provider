@@ -91,7 +91,7 @@ https://ytsaurus.tech/docs/en/user-guide/storage/access-control#users_groups
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
-				Description: "ObjectID in YTsaurus cluster, can be found in object's @id attribute.",
+				Description: "ObjectID in the YTsaurus cluster, can be found in an object's @id attribute.",
 			},
 			"name": schema.StringAttribute{
 				Required:    true,

@@ -35,6 +35,6 @@ https://ytsaurus.tech/docs/en/user-guide/storage/access-control#users_groups
 
 ### Read-Only
 
-- `id` (String) ObjectID in YTsaurus cluster, can be found in object's @id attribute.
+- `id` (String) ObjectID in the YTsaurus cluster, can be found in an object's @id attribute.
 
 

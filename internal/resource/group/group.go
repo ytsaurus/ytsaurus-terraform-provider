@@ -62,7 +62,7 @@ func (r *groupResource) Configure(_ context.Context, req resource.ConfigureReque
 func (r *groupResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: `
-Groups are containers for both users and other groups and mainly are used as an ACL subjects. 
+Groups are containers for both users and other groups and are mainly used as ACL subjects. 
 
 More information:
 https://ytsaurus.tech/docs/en/user-guide/storage/access-control#users_groups
@@ -73,7 +73,7 @@ https://ytsaurus.tech/docs/en/user-guide/storage/access-control#users_groups
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
-				Description: "ObjectID in YTsaurus cluster, can be found in object's @id attribute.",
+				Description: "ObjectID in the YTsaurus cluster, can be found in an object's @id attribute.",
 			},
 			"name": schema.StringAttribute{
 				Required:    true,
