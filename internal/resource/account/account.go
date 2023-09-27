@@ -298,9 +298,12 @@ func (r *accountResource) Update(ctx context.Context, req resource.UpdateRequest
 	ytAccount := toYTsaurusAccount(plan)
 	p := ypath.Path(fmt.Sprintf("#%s", objectID))
 	attributeUpdates := map[string]interface{}{
-		"name":        ytAccount.Name,
 		"inherit_acl": ytAccount.InheritACL,
 		"acl":         ytAccount.ACL,
+	}
+
+	if ytAccount.Name != "root" {
+		attributeUpdates["name"] = ytAccount.Name
 	}
 
 	if ytAccount.ResourceLimits != nil {
@@ -309,7 +312,7 @@ func (r *accountResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	if len(ytAccount.ParentName) > 0 {
 		attributeUpdates["parent_name"] = ytAccount.ParentName
-	} else {
+	} else if ytAccount.Name != "root" {
 		attributeUpdates["parent_name"] = "root"
 	}
 
