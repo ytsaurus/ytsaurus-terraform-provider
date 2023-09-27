@@ -9,6 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
@@ -71,6 +73,7 @@ func toYTsaurusAccountResourceLimits(r AccountResourceLimitsModel) ytsaurus.Acco
 type AccountModel struct {
 	ID             types.String                `tfsdk:"id"`
 	Name           types.String                `tfsdk:"name"`
+	InheritACL     types.Bool                  `tfsdk:"inherit_acl"`
 	ACL            acl.ACLModel                `tfsdk:"acl"`
 	ParentName     types.String                `tfsdk:"parent_name"`
 	ResourceLimits *AccountResourceLimitsModel `tfsdk:"resource_limits"`
@@ -80,6 +83,7 @@ func toAccountModel(a ytsaurus.Account) AccountModel {
 	account := AccountModel{
 		ID:             types.StringValue(a.ID),
 		Name:           types.StringValue(a.Name),
+		InheritACL:     types.BoolValue(a.InheritACL),
 		ACL:            acl.ToACLModel(a.ACL),
 		ResourceLimits: toResourceLimitsModel(a.ResourceLimits),
 	}
@@ -96,6 +100,7 @@ func toAccountModel(a ytsaurus.Account) AccountModel {
 func toYTsaurusAccount(a AccountModel) ytsaurus.Account {
 	return ytsaurus.Account{
 		Name:           a.Name.ValueString(),
+		InheritACL:     a.InheritACL.ValueBool(),
 		ACL:            acl.ToYTsaurusACL(a.ACL),
 		ResourceLimits: toYTsaurusAccountResourceLimits(*a.ResourceLimits),
 		ParentName:     a.ParentName.ValueString(),
@@ -141,6 +146,15 @@ https://ytsaurus.tech/docs/en/user-guide/storage/accounts
 			"name": schema.StringAttribute{
 				Required:    true,
 				Description: "YTsaurus account name",
+			},
+			"inherit_acl": schema.BoolAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(true),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+				Description: "Enable or disable ACL inheritance from an object's parents.",
 			},
 			"acl": schema.ListNestedAttribute{
 				Optional:     true,
@@ -209,6 +223,7 @@ func (r *accountResource) Create(ctx context.Context, req resource.CreateRequest
 	createOptions := &yt.CreateObjectOptions{
 		Attributes: map[string]interface{}{
 			"name":               ytAccount.Name,
+			"inherit_acl":        ytAccount.InheritACL,
 			"acl":                ytAccount.ACL,
 			"resource_limits":    ytAccount.ResourceLimits,
 			"terraform_resource": true,
@@ -274,6 +289,7 @@ func (r *accountResource) Update(ctx context.Context, req resource.UpdateRequest
 	p := ypath.Path(fmt.Sprintf("#%s", objectID))
 	attributeUpdates := map[string]interface{}{
 		"name":            ytAccount.Name,
+		"inherit_acl":     ytAccount.InheritACL,
 		"acl":             ytAccount.ACL,
 		"resource_limits": ytAccount.ResourceLimits,
 	}
