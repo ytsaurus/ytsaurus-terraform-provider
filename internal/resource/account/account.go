@@ -42,7 +42,10 @@ type AccountResourceLimitsModel struct {
 	DiskSpacePerMedium map[string]types.Int64 `tfsdk:"disk_space_per_medium"`
 }
 
-func toResourceLimitsModel(r ytsaurus.AccountResourceLimits) *AccountResourceLimitsModel {
+func toResourceLimitsModel(r *ytsaurus.AccountResourceLimits) *AccountResourceLimitsModel {
+	if r == nil {
+		return nil
+	}
 	resourceLimit := AccountResourceLimitsModel{
 		NodeCount:          types.Int64Value(r.NodeCount),
 		ChunkCount:         types.Int64Value(r.ChunkCount),
@@ -56,7 +59,10 @@ func toResourceLimitsModel(r ytsaurus.AccountResourceLimits) *AccountResourceLim
 	return &resourceLimit
 }
 
-func toYTsaurusAccountResourceLimits(r AccountResourceLimitsModel) ytsaurus.AccountResourceLimits {
+func toYTsaurusAccountResourceLimits(r *AccountResourceLimitsModel) *ytsaurus.AccountResourceLimits {
+	if r == nil {
+		return nil
+	}
 	resourceLimits := ytsaurus.AccountResourceLimits{
 		NodeCount:          r.NodeCount.ValueInt64(),
 		ChunkCount:         r.ChunkCount.ValueInt64(),
@@ -67,7 +73,7 @@ func toYTsaurusAccountResourceLimits(r AccountResourceLimitsModel) ytsaurus.Acco
 	for k, v := range r.DiskSpacePerMedium {
 		resourceLimits.DiskSpacePerMedium[k] = v.ValueInt64()
 	}
-	return resourceLimits
+	return &resourceLimits
 }
 
 type AccountModel struct {
@@ -102,7 +108,7 @@ func toYTsaurusAccount(a AccountModel) ytsaurus.Account {
 		Name:           a.Name.ValueString(),
 		InheritACL:     a.InheritACL.ValueBool(),
 		ACL:            acl.ToYTsaurusACL(a.ACL),
-		ResourceLimits: toYTsaurusAccountResourceLimits(*a.ResourceLimits),
+		ResourceLimits: toYTsaurusAccountResourceLimits(a.ResourceLimits),
 		ParentName:     a.ParentName.ValueString(),
 	}
 }
@@ -169,7 +175,8 @@ https://ytsaurus.tech/docs/en/user-guide/storage/accounts
 				Description: "Parent account name",
 			},
 			"resource_limits": schema.SingleNestedAttribute{
-				Required:    true,
+				// Required:    true,
+				Optional:    true,
 				Description: "Resource limits for the account",
 				Attributes: map[string]schema.Attribute{
 					"node_count": schema.Int64Attribute{
@@ -225,9 +232,12 @@ func (r *accountResource) Create(ctx context.Context, req resource.CreateRequest
 			"name":               ytAccount.Name,
 			"inherit_acl":        ytAccount.InheritACL,
 			"acl":                ytAccount.ACL,
-			"resource_limits":    ytAccount.ResourceLimits,
 			"terraform_resource": true,
 		},
+	}
+
+	if ytAccount.ResourceLimits != nil {
+		createOptions.Attributes["resource_limits"] = ytAccount.ResourceLimits
 	}
 
 	if len(ytAccount.ParentName) > 0 {
@@ -288,10 +298,13 @@ func (r *accountResource) Update(ctx context.Context, req resource.UpdateRequest
 	ytAccount := toYTsaurusAccount(plan)
 	p := ypath.Path(fmt.Sprintf("#%s", objectID))
 	attributeUpdates := map[string]interface{}{
-		"name":            ytAccount.Name,
-		"inherit_acl":     ytAccount.InheritACL,
-		"acl":             ytAccount.ACL,
-		"resource_limits": ytAccount.ResourceLimits,
+		"name":        ytAccount.Name,
+		"inherit_acl": ytAccount.InheritACL,
+		"acl":         ytAccount.ACL,
+	}
+
+	if ytAccount.ResourceLimits != nil {
+		attributeUpdates["resource_limits"] = ytAccount.ResourceLimits
 	}
 
 	if len(ytAccount.ParentName) > 0 {
