@@ -61,15 +61,22 @@ cd ~/go/src/terraform-provider-ytsaurus
 make install
 ```
 
-### How to configure ~/.terraformrc
-Add dev_overrides to ~/.terraformrc
+### How to configure ~/.terraformrc for development and tests
+Run ```make install```.
+
+Add ```dev_overrides``` to ~/.terraformrc,
+and do not run ```terraform init``` inside a directory with your .tf files.
+
+
 ```
  $ cat ~/.terraformrc
 provider_installation {
   dev_overrides {
       "registry.terraform.io/ytsaurus/ytsaurus" = "<HOME>/go/bin"
   }
-  direct {}
+  direct {
+      exclude = ["registry.terraform.io/ytsaurus/*"]
+  }
 }
 ```
 
