@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -14,8 +14,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"go.ytsaurus.tech/yt/go/ypath"
@@ -32,7 +32,7 @@ type userResource struct {
 type UserModel struct {
 	ID       types.String `tfsdk:"id"`
 	Name     types.String `tfsdk:"name"`
-	MemberOf types.List   `tfsdk:"member_of"`
+	MemberOf types.Set    `tfsdk:"member_of"`
 }
 
 func toYTsaurusUser(ctx context.Context, u UserModel) (ytsaurus.User, diag.Diagnostics) {
@@ -56,9 +56,9 @@ func toUserModel(u ytsaurus.User) UserModel {
 		for _, m := range *u.MemberOf {
 			memberOf = append(memberOf, types.StringValue(m))
 		}
-		user.MemberOf = types.ListValueMust(types.StringType, memberOf)
+		user.MemberOf = types.SetValueMust(types.StringType, memberOf)
 	} else {
-		user.MemberOf = types.ListNull(types.StringType)
+		user.MemberOf = types.SetNull(types.StringType)
 	}
 	return user
 }
@@ -97,16 +97,16 @@ https://ytsaurus.tech/docs/en/user-guide/storage/access-control#users_groups
 				Required:    true,
 				Description: "YTsaurus user name.",
 			},
-			"member_of": schema.ListAttribute{
+			"member_of": schema.SetAttribute{
 				Optional:    true,
 				ElementType: types.StringType,
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
 				},
-				Validators: []validator.List{
-					listvalidator.SizeAtLeast(1),
+				Validators: []validator.Set{
+					setvalidator.SizeAtLeast(1),
 				},
-				Description: "A list of user's groups.",
+				Description: "A set of user's groups.",
 			},
 		},
 	}

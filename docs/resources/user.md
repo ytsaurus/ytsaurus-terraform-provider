@@ -31,7 +31,7 @@ https://ytsaurus.tech/docs/en/user-guide/storage/access-control#users_groups
 
 ### Optional
 
-- `member_of` (List of String) A list of user's groups.
+- `member_of` (Set of String) A set of user's groups.
 
 ### Read-Only
 

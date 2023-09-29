@@ -37,7 +37,7 @@ func TestUserResourceCreateAndUpdate(t *testing.T) {
 
 	configAddMemberOf := user.UserModel{
 		Name:     types.StringValue(testUserName),
-		MemberOf: types.ListValueMust(types.StringType, testMemberOfValues),
+		MemberOf: types.SetValueMust(types.StringType, testMemberOfValues),
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -84,7 +84,7 @@ func TestUserResourceCreateWithAllOptions(t *testing.T) {
 
 	configCreate := user.UserModel{
 		Name:     types.StringValue(testUserName),
-		MemberOf: types.ListValueMust(types.StringType, testMemberOfValues),
+		MemberOf: types.SetValueMust(types.StringType, testMemberOfValues),
 	}
 
 	resource.Test(t, resource.TestCase{
