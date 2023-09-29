@@ -9,6 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
@@ -74,6 +76,7 @@ type AccountModel struct {
 	ACL            acl.ACLModel                `tfsdk:"acl"`
 	ParentName     types.String                `tfsdk:"parent_name"`
 	ResourceLimits *AccountResourceLimitsModel `tfsdk:"resource_limits"`
+	InheritACL     types.Bool                  `tfsdk:"inherit_acl"`
 }
 
 func toAccountModel(a ytsaurus.Account) AccountModel {
@@ -82,6 +85,7 @@ func toAccountModel(a ytsaurus.Account) AccountModel {
 		Name:           types.StringValue(a.Name),
 		ACL:            acl.ToACLModel(a.ACL),
 		ResourceLimits: toResourceLimitsModel(a.ResourceLimits),
+		InheritACL:     types.BoolValue(a.InheritACL),
 	}
 
 	if a.ParentName == "root" {
@@ -98,6 +102,7 @@ func toYTsaurusAccount(a AccountModel) ytsaurus.Account {
 		Name:           a.Name.ValueString(),
 		ACL:            acl.ToYTsaurusACL(a.ACL),
 		ResourceLimits: toYTsaurusAccountResourceLimits(*a.ResourceLimits),
+		InheritACL:     a.InheritACL.ValueBool(),
 		ParentName:     a.ParentName.ValueString(),
 	}
 }
@@ -153,6 +158,15 @@ https://ytsaurus.tech/docs/en/user-guide/storage/accounts
 			"parent_name": schema.StringAttribute{
 				Optional:    true,
 				Description: "Parent account name",
+			},
+			"inherit_acl": schema.BoolAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(true),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+				Description: "Enable or disable ACL inheritance from an object's parents.",
 			},
 			"resource_limits": schema.SingleNestedAttribute{
 				Required:    true,
@@ -210,6 +224,7 @@ func (r *accountResource) Create(ctx context.Context, req resource.CreateRequest
 		Attributes: map[string]interface{}{
 			"name":               ytAccount.Name,
 			"acl":                ytAccount.ACL,
+			"inherit_acl":        ytAccount.InheritACL,
 			"resource_limits":    ytAccount.ResourceLimits,
 			"terraform_resource": true,
 		},
@@ -276,6 +291,7 @@ func (r *accountResource) Update(ctx context.Context, req resource.UpdateRequest
 		"name":            ytAccount.Name,
 		"acl":             ytAccount.ACL,
 		"resource_limits": ytAccount.ResourceLimits,
+		"inherit_acl":     ytAccount.InheritACL,
 	}
 
 	if len(ytAccount.ParentName) > 0 {

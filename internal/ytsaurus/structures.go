@@ -27,6 +27,7 @@ type Account struct {
 	ID             string                `yson:"id"`
 	Name           string                `yson:"name"`
 	ResourceLimits AccountResourceLimits `yson:"resource_limits"`
+	InheritACL     bool                  `yson:"inherit_acl"`
 	ACL            []yt.ACE              `yson:"acl"`
 	ParentName     string                `yson:"parent_name"`
 }

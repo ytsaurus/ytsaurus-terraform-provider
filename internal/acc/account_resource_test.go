@@ -29,6 +29,8 @@ func TestAccountResourceCreateAndUpdate(t *testing.T) {
 	testTabletStaticMemory := int64(10000)
 	testDefaultMedium := "default"
 	testDefaultMediumSize := int64(1000000)
+	testDefaultInheritAcl := true
+	testInheritAcl := false
 
 	testACL := []yt.ACE{
 		{
@@ -73,7 +75,8 @@ func TestAccountResourceCreateAndUpdate(t *testing.T) {
 	}
 
 	configUpdate := account.AccountModel{
-		Name: types.StringValue(testAccountName),
+		Name:       types.StringValue(testAccountName),
+		InheritACL: types.BoolValue(testInheritAcl),
 		ResourceLimits: &account.AccountResourceLimitsModel{
 			ChunkCount: types.Int64Value(testChunkCount + 1),
 			NodeCount:  types.Int64Value(testNodeCount + 1),
@@ -109,6 +112,7 @@ func TestAccountResourceCreateAndUpdate(t *testing.T) {
 					accCheckYTsaurusInt64Attribute(testAccountYTCypressPath, "resource_limits/node_count", testNodeCount),
 					accCheckYTsaurusInt64Attribute(testAccountYTCypressPath, "resource_limits/chunk_count", testChunkCount),
 					accCheckYTsaurusInt64Attribute(testAccountYTCypressPath, "resource_limits/disk_space_per_medium/default", testDefaultMediumSize),
+					accCheckYTsaurusBoolAttribute(testAccountYTCypressPath, "inherit_acl", testDefaultInheritAcl),
 				),
 			},
 			{
@@ -127,6 +131,7 @@ func TestAccountResourceCreateAndUpdate(t *testing.T) {
 					accCheckYTsaurusInt64Attribute(testAccountYTCypressPath, "resource_limits/tablet_count", testTabletCount),
 					accCheckYTsaurusInt64Attribute(testAccountYTCypressPath, "resource_limits/tablet_static_memory", testTabletStaticMemory),
 					accCheckYTsaurusACLAttribute(testAccountYTCypressPath, testACL),
+					accCheckYTsaurusBoolAttribute(testAccountYTCypressPath, "inherit_acl", testInheritAcl),
 				),
 			},
 		},
@@ -145,6 +150,7 @@ func TestAccountResourceCreateWithAllOptions(t *testing.T) {
 	testTabletStaticMemory := int64(10000)
 	testDefaultMedium := "default"
 	testDefaultMediumSize := int64(1000000)
+	testInheritAcl := false
 
 	testACL := []yt.ACE{
 		{
@@ -166,7 +172,8 @@ func TestAccountResourceCreateWithAllOptions(t *testing.T) {
 			TabletCount:        types.Int64Value(testTabletCount),
 			TabletStaticMemory: types.Int64Value(testTabletStaticMemory),
 		},
-		ACL: acl.ToACLModel(testACL),
+		ACL:        acl.ToACLModel(testACL),
+		InheritACL: types.BoolValue(testInheritAcl),
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -183,6 +190,7 @@ func TestAccountResourceCreateWithAllOptions(t *testing.T) {
 					accCheckYTsaurusInt64Attribute(testAccountYTCypressPath, "resource_limits/tablet_count", testTabletCount),
 					accCheckYTsaurusInt64Attribute(testAccountYTCypressPath, "resource_limits/tablet_static_memory", testTabletStaticMemory),
 					accCheckYTsaurusACLAttribute(testAccountYTCypressPath, testACL),
+					accCheckYTsaurusBoolAttribute(testAccountYTCypressPath, "inherit_acl", testInheritAcl),
 				),
 			},
 		},
@@ -276,6 +284,11 @@ func accResourceYtsaurusAccountConfig(id string, m account.AccountModel) string 
 	if !m.ParentName.IsNull() {
 		config += fmt.Sprintf(`
 		parent_name = %s`, m.ParentName.ValueString())
+	}
+
+	if !m.InheritACL.IsNull() {
+		config += fmt.Sprintf(`
+		inherit_acl = %t`, m.InheritACL.ValueBool())
 	}
 
 	if m.ResourceLimits != nil {

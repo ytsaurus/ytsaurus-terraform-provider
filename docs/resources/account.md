@@ -28,6 +28,7 @@ https://ytsaurus.tech/docs/en/user-guide/storage/accounts
 ### Optional
 
 - `acl` (Attributes List) A list of ACE records. More information: https://ytsaurus.tech/docs/en/user-guide/storage/access-control (see [below for nested schema](#nestedatt--acl))
+- `inherit_acl` (Boolean) Enable or disable ACL inheritance from an object's parents.
 - `parent_name` (String) Parent account name
 
 ### Read-Only
