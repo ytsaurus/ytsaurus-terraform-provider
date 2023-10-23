@@ -128,7 +128,7 @@ resource "ytsaurus_medium" "ssd_data_medium" {
   acl = var.acl_mrcat_use
 }
 
-# To dedicate some of the cluster's resources to a special user, a tablet cell bundle should be created.
+# To dedicate some of the cluster's resources to a specific user, a tablet cell bundle should be created.
 resource "ytsaurus_tablet_cell_bundle" "mrcat_tcb" {
   name              = "mrcat"
   tablet_cell_count = 1
