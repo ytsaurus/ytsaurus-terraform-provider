@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -25,8 +26,9 @@ import (
 type ytsaurusProvider struct{}
 
 type ytsaurusProviderModel struct {
-	Cluster types.String `tfsdk:"cluster"`
-	Token   types.String `tfsdk:"token"`
+	Cluster      types.String `tfsdk:"cluster"`
+	Token        types.String `tfsdk:"token"`
+	TokenEnvName types.String `tfsdk:"token_env_name"`
 }
 
 var (
@@ -52,6 +54,10 @@ func (p *ytsaurusProvider) Schema(_ context.Context, _ provider.SchemaRequest, r
 				Optional:    true,
 				Description: "Admin's token. Use YT_TOKEN_PATH environment variable instead.",
 			},
+			"token_env_name": schema.StringAttribute{
+				Optional:    true,
+				Description: "Admin's token env name",
+			},
 		},
 	}
 }
@@ -66,7 +72,16 @@ func (p *ytsaurusProvider) Configure(ctx context.Context, req provider.Configure
 	clientConfig := &yt.Config{
 		Proxy: config.Cluster.ValueString(),
 	}
-	if !config.Token.IsNull() {
+
+	if !config.TokenEnvName.IsNull() {
+		token := os.Getenv(config.TokenEnvName.ValueString())
+		if token == "" {
+			resp.Diagnostics.AddError("Unable to Create YTsaurus Client",
+				fmt.Sprintf("Failed to find env variable %s", config.TokenEnvName.ValueString()))
+			return
+		}
+		clientConfig.Token = token
+	} else if !config.Token.IsNull() {
 		clientConfig.Token = config.Token.ValueString()
 	} else {
 		clientConfig.ReadTokenFromFile = true
