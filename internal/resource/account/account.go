@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -97,14 +98,15 @@ func toAccountModel(a ytsaurus.Account) AccountModel {
 	return account
 }
 
-func toYTsaurusAccount(a AccountModel) ytsaurus.Account {
+func toYTsaurusAccount(a AccountModel) (ytsaurus.Account, diag.Diagnostics) {
+	acl, diags := acl.ToYTsaurusACL(a.ACL)
 	return ytsaurus.Account{
 		Name:           a.Name.ValueString(),
-		ACL:            acl.ToYTsaurusACL(a.ACL),
+		ACL:            acl,
 		ResourceLimits: toYTsaurusAccountResourceLimits(*a.ResourceLimits),
 		InheritACL:     a.InheritACL.ValueBool(),
 		ParentName:     a.ParentName.ValueString(),
-	}
+	}, diags
 }
 
 var (
@@ -219,7 +221,12 @@ func (r *accountResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	ytAccount := toYTsaurusAccount(plan)
+	ytAccount, diags := toYTsaurusAccount(plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	createOptions := &yt.CreateObjectOptions{
 		Attributes: map[string]interface{}{
 			"name":               ytAccount.Name,
@@ -285,7 +292,12 @@ func (r *accountResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	ytAccount := toYTsaurusAccount(plan)
+	ytAccount, diags := toYTsaurusAccount(plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	p := ypath.Path(fmt.Sprintf("#%s", objectID))
 	attributeUpdates := map[string]interface{}{
 		"name":            ytAccount.Name,
@@ -326,7 +338,12 @@ func (r *accountResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	ytAccount := toYTsaurusAccount(state)
+	ytAccount, diags := toYTsaurusAccount(state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	p := ypath.Path(fmt.Sprintf("//sys/accounts/%s", ytAccount.Name))
 
 	var subNodes []string

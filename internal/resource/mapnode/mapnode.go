@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -49,13 +50,14 @@ func toMapNodeModel(m ytsaurus.MapNode) MapNodeModel {
 	}
 }
 
-func toYTsaurusMapNode(m MapNodeModel) ytsaurus.MapNode {
+func toYTsaurusMapNode(m MapNodeModel) (ytsaurus.MapNode, diag.Diagnostics) {
+	acl, diags := acl.ToYTsaurusACL(m.ACL)
 	return ytsaurus.MapNode{
 		Path:       m.Path.ValueString(),
 		Account:    m.Account.ValueString(),
 		InheritACL: m.InheritACL.ValueBool(),
-		ACL:        acl.ToYTsaurusACL(m.ACL),
-	}
+		ACL:        acl,
+	}, diags
 }
 
 func NewGroupResource() resource.Resource {
@@ -120,7 +122,12 @@ func (r *mapNodeResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	ytMapNode := toYTsaurusMapNode(plan)
+	ytMapNode, diags := toYTsaurusMapNode(plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	createOptions := &yt.CreateNodeOptions{
 		Attributes: map[string]interface{}{
 			"acl":                ytMapNode.ACL,
@@ -218,7 +225,12 @@ func (r *mapNodeResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	ytMapNode := toYTsaurusMapNode(plan)
+	ytMapNode, diags := toYTsaurusMapNode(plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	p := ypath.Path(fmt.Sprintf("#%s", state.ID.ValueString()))
 	attributeUpdates := map[string]interface{}{
 		"account":     ytMapNode.Account,

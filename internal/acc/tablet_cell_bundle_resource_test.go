@@ -248,7 +248,7 @@ func accResourceYtsaurusTabletCellBundleConfig(id string, m tabletcellbundle.Tab
 		node_tag_filter = %q`, m.NodeTagFilter.ValueString())
 	}
 
-	acl := acl.ToYTsaurusACL(m.ACL)
+	acl, _ := acl.ToYTsaurusACL(m.ACL)
 	if len(acl) > 0 {
 		config += accAddACLConfig(acl)
 	}

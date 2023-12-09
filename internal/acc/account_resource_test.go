@@ -332,7 +332,8 @@ func accResourceYtsaurusAccountConfig(id string, m account.AccountModel) string 
 		}`
 	}
 
-	config += accAddACLConfig(acl.ToYTsaurusACL(m.ACL))
+	acl, _ := acl.ToYTsaurusACL(m.ACL)
+	config += accAddACLConfig(acl)
 
 	config += `
 	}`

@@ -143,7 +143,7 @@ func accResourceYtsaurusMapNodeConfig(id string, m mapnode.MapNodeModel) string 
 		inherit_acl = %t`, m.InheritACL.ValueBool())
 	}
 
-	acl := acl.ToYTsaurusACL(m.ACL)
+	acl, _ := acl.ToYTsaurusACL(m.ACL)
 	if len(acl) > 0 {
 		config += accAddACLConfig(acl)
 	}

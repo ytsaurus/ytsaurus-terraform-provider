@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -112,15 +113,16 @@ func toYTsaurusTabletCellBundleOptions(o *TabletCellBundleOptionsModel) *ytsauru
 	}
 }
 
-func toYTsaurusTabletCellBundle(b TabletCellBundleModel) ytsaurus.TabletCellBundle {
+func toYTsaurusTabletCellBundle(b TabletCellBundleModel) (ytsaurus.TabletCellBundle, diag.Diagnostics) {
+	acl, diags := acl.ToYTsaurusACL(b.ACL)
 	return ytsaurus.TabletCellBundle{
 		ID:              b.ID.ValueString(),
 		Name:            b.Name.ValueString(),
 		NodeTagFilter:   b.NodeTagFilter.ValueString(),
 		TabletCellCount: b.TabletCellCount.ValueInt64(),
-		ACL:             acl.ToYTsaurusACL(b.ACL),
+		ACL:             acl,
 		Options:         toYTsaurusTabletCellBundleOptions(b.Options),
-	}
+	}, diags
 }
 
 var (
@@ -261,7 +263,12 @@ func (r *tabletCellBundleResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	ytTabletCellBundle := toYTsaurusTabletCellBundle(plan)
+	ytTabletCellBundle, diags := toYTsaurusTabletCellBundle(plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	createOptions := &yt.CreateObjectOptions{
 		Attributes: map[string]interface{}{
 			"name":               ytTabletCellBundle.Name,
@@ -368,8 +375,17 @@ func (r *tabletCellBundleResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	ytTabletCellBundlePlan := toYTsaurusTabletCellBundle(plan)
-	ytTabletCellBundleState := toYTsaurusTabletCellBundle(state)
+	ytTabletCellBundlePlan, diags := toYTsaurusTabletCellBundle(plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	ytTabletCellBundleState, diags := toYTsaurusTabletCellBundle(state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	attributeUpdates := map[string]interface{}{
 		"name":            ytTabletCellBundlePlan.Name,
@@ -416,7 +432,11 @@ func (r *tabletCellBundleResource) Delete(ctx context.Context, req resource.Dele
 		return
 	}
 
-	ytTabletCellBundleState := toYTsaurusTabletCellBundle(state)
+	ytTabletCellBundleState, diags := toYTsaurusTabletCellBundle(state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	if err := r.updateTabletCellCount(ctx, ytTabletCellBundleState.Name, ytTabletCellBundleState.TabletCellCount, 0); err != nil {
 		resp.Diagnostics.AddError(

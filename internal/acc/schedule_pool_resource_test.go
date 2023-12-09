@@ -675,7 +675,7 @@ func accResourceYtsaurusSchedulerPoolConfig(id string, m schedulerpool.Scheduler
 		}`
 	}
 
-	acl := acl.ToYTsaurusACL(m.ACL)
+	acl, _ := acl.ToYTsaurusACL(m.ACL)
 	if len(acl) > 0 {
 		config += accAddACLConfig(acl)
 	}

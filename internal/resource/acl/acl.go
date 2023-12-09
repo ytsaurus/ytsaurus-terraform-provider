@@ -1,9 +1,12 @@
 package acl
 
 import (
+	"context"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -20,55 +23,80 @@ const (
 )
 
 type ACEModel struct {
-	Action          types.String   `tfsdk:"action"`
-	Subjects        []types.String `tfsdk:"subjects"`
-	Permissions     []types.String `tfsdk:"permissions"`
-	InheritanceMode types.String   `tfsdk:"inheritance_mode"`
+	Action          types.String `tfsdk:"action"`
+	Subjects        types.Set    `tfsdk:"subjects"`
+	Permissions     types.Set    `tfsdk:"permissions"`
+	InheritanceMode types.String `tfsdk:"inheritance_mode"`
 }
 
-func toYTsaurusACE(ace ACEModel) yt.ACE {
+func toYTsaurusACE(ace ACEModel) (yt.ACE, diag.Diagnostics) {
 	ytACE := yt.ACE{}
+	var diags diag.Diagnostics
 
 	ytACE.Action = yt.SecurityAction(ace.Action.ValueString())
 	ytACE.InheritanceMode = ace.InheritanceMode.ValueString()
-	for _, s := range ace.Subjects {
-		ytACE.Subjects = append(ytACE.Subjects, s.ValueString())
-	}
-	for _, p := range ace.Permissions {
-		ytACE.Permissions = append(ytACE.Permissions, yt.Permission(p.ValueString()))
+
+	if !ace.Subjects.IsUnknown() {
+		ytACE.Subjects = make([]string, 0, len(ace.Subjects.Elements()))
+		diags.Append(ace.Subjects.ElementsAs(context.TODO(), &ytACE.Subjects, false)...)
 	}
 
-	return ytACE
+	if !ace.Permissions.IsUnknown() {
+		permissions := make([]string, 0, len(ace.Permissions.Elements()))
+		diags.Append(ace.Permissions.ElementsAs(context.TODO(), &permissions, false)...)
+		for _, p := range permissions {
+			ytACE.Permissions = append(ytACE.Permissions, yt.Permission(p))
+		}
+	}
+
+	return ytACE, diags
 }
 
-func toACEModel(ytACE yt.ACE) ACEModel {
+func toACEModel(ytACE yt.ACE) (ACEModel, diag.Diagnostics) {
 	ace := ACEModel{}
+	var diags diag.Diagnostics
+
 	ace.Action = types.StringValue(string(ytACE.Action))
 	ace.InheritanceMode = types.StringValue(ytACE.InheritanceMode)
-	for _, s := range ytACE.Subjects {
-		ace.Subjects = append(ace.Subjects, types.StringValue(s))
-	}
+
+	ace.Subjects, diags = types.SetValueFrom(context.TODO(), types.StringType, ytACE.Subjects)
+
+	permissions := make([]string, 0, len(ytACE.Permissions))
 	for _, p := range ytACE.Permissions {
-		ace.Permissions = append(ace.Permissions, types.StringValue(string(p)))
+		permissions = append(permissions, string(p))
 	}
-	return ace
+	var valDiags diag.Diagnostics
+	ace.Permissions, valDiags = types.SetValueFrom(context.TODO(), types.StringType, permissions)
+	diags.Append(valDiags...)
+
+	return ace, diags
 }
 
 type ACLModel []ACEModel
 
-func ToYTsaurusACL(acl ACLModel) []yt.ACE {
+func ToYTsaurusACL(acl ACLModel) ([]yt.ACE, diag.Diagnostics) {
 	var ytACL []yt.ACE
+	var diags diag.Diagnostics
+
 	for _, ace := range acl {
-		ytACL = append(ytACL, toYTsaurusACE(ace))
+		ytACE, aceDiags := toYTsaurusACE(ace)
+		ytACL = append(ytACL, ytACE)
+		diags.Append(aceDiags...)
 	}
-	return ytACL
+
+	return ytACL, diags
 }
 
 func ToACLModel(ytACL []yt.ACE) ACLModel {
 	var acl ACLModel
+	var diags diag.Diagnostics
+
 	for _, ytACE := range ytACL {
-		acl = append(acl, toACEModel(ytACE))
+		ace, aceDiags := toACEModel(ytACE)
+		acl = append(acl, ace)
+		diags.Append(aceDiags...)
 	}
+
 	return acl
 }
 
