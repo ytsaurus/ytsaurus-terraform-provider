@@ -26,7 +26,11 @@ func (v schedulerPoolResourceConfigValidator) ValidateResource(ctx context.Conte
 		return
 	}
 
-	ytSchedulerPool := toYTsaurusSchedulerPool(config)
+	ytSchedulerPool, diags := toYTsaurusSchedulerPool(config)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	if ytSchedulerPool.MaxRunningOperationCount != nil &&
 		ytSchedulerPool.MaxOperationCount != nil &&

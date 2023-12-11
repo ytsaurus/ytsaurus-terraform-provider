@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -144,11 +145,12 @@ func toSchedulerPoolModel(p ytsaurus.SchedulerPool) SchedulerPoolModel {
 	return model
 }
 
-func toYTsaurusSchedulerPool(p SchedulerPoolModel) ytsaurus.SchedulerPool {
+func toYTsaurusSchedulerPool(p SchedulerPoolModel) (ytsaurus.SchedulerPool, diag.Diagnostics) {
+	acl, diags := acl.ToYTsaurusACL(p.ACL)
 	return ytsaurus.SchedulerPool{
 		ID:                        p.ID.ValueString(),
 		Name:                      p.Name.ValueString(),
-		ACL:                       acl.ToYTsaurusACL(p.ACL),
+		ACL:                       acl,
 		ParentName:                p.ParentName.ValueStringPointer(),
 		MaxRunningOperationCount:  p.MaxRunningOperationCount.ValueInt64Pointer(),
 		MaxOperationCount:         p.MaxOperationCount.ValueInt64Pointer(),
@@ -159,7 +161,7 @@ func toYTsaurusSchedulerPool(p SchedulerPoolModel) ytsaurus.SchedulerPool {
 		Mode:                      p.Mode.ValueStringPointer(),
 		ForbidImmediateOperations: p.ForbidImmediateOperations.ValueBoolPointer(),
 		Path:                      fmt.Sprintf("//sys/pool_trees/%s/%s", p.PoolTree.ValueString(), p.Name.ValueString()),
-	}
+	}, diags
 }
 
 func ytSchedulerPoolResourcesToMap(r *ytsaurus.SchedulerPoolResources) map[string]int64 {
@@ -368,7 +370,12 @@ func (r *schedulerPoolResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	ytSchedulerPool := toYTsaurusSchedulerPool(plan)
+	ytSchedulerPool, diags := toYTsaurusSchedulerPool(plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	createOptions := &yt.CreateObjectOptions{
 		Attributes: map[string]interface{}{
 			"name":               ytSchedulerPool.Name,
@@ -467,8 +474,17 @@ func (r *schedulerPoolResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	ytSchedulerPoolPlan := toYTsaurusSchedulerPool(plan)
-	ytSchedulerPoolState := toYTsaurusSchedulerPool(state)
+	ytSchedulerPoolPlan, valDiags := toYTsaurusSchedulerPool(plan)
+	resp.Diagnostics.Append(valDiags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	ytSchedulerPoolState, valDiags := toYTsaurusSchedulerPool(state)
+	resp.Diagnostics.Append(valDiags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	attributeUpdates := map[string]interface{}{
 		"name": ytSchedulerPoolPlan.Name,
@@ -595,7 +611,12 @@ func (r *schedulerPoolResource) Delete(ctx context.Context, req resource.DeleteR
 		return
 	}
 
-	ytSchedulerPool := toYTsaurusSchedulerPool(state)
+	ytSchedulerPool, diags := toYTsaurusSchedulerPool(state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	p := ypath.Path(fmt.Sprintf("#%s", ytSchedulerPool.ID))
 	if err := r.client.RemoveNode(ctx, p, nil); err != nil {
 		resp.Diagnostics.AddError(

@@ -86,10 +86,13 @@ type mediumModel struct {
 func toYTsaurusMedium(ctx context.Context, m mediumModel) (ytsaurus.Medium, diag.Diagnostics) {
 	var diskFamilyWhitelist []string
 	diags := m.DiskFamilyWhitelist.ElementsAs(ctx, &diskFamilyWhitelist, false)
+	acl, valDiags := acl.ToYTsaurusACL(m.ACL)
+	diags.Append(valDiags...)
+
 	ytMedium := ytsaurus.Medium{
 		Name:                m.Name.ValueString(),
 		DiskFamilyWhitelist: &diskFamilyWhitelist,
-		ACL:                 acl.ToYTsaurusACL(m.ACL),
+		ACL:                 acl,
 	}
 
 	if m.Config != nil {
