@@ -25,8 +25,10 @@ import (
 type ytsaurusProvider struct{}
 
 type ytsaurusProviderModel struct {
-	Cluster types.String `tfsdk:"cluster"`
-	Token   types.String `tfsdk:"token"`
+	Cluster   types.String `tfsdk:"cluster"`
+	Token     types.String `tfsdk:"token"`
+	UseTLS    types.Bool   `tfsdk:"use_tls"`
+	ClusterCA types.String `tfsdk:"cluster_ca"`
 }
 
 var (
@@ -52,6 +54,14 @@ func (p *ytsaurusProvider) Schema(_ context.Context, _ provider.SchemaRequest, r
 				Optional:    true,
 				Description: "Admin's token. Use YT_TOKEN_PATH environment variable instead.",
 			},
+			"use_tls": schema.BoolAttribute{
+				Optional:    true,
+				Description: "Whether to use TLS connection.",
+			},
+			"cluster_ca": schema.StringAttribute{
+				Optional:    true,
+				Description: "PEM-encoded root certificates bundle for TLS.",
+			},
 		},
 	}
 }
@@ -70,6 +80,12 @@ func (p *ytsaurusProvider) Configure(ctx context.Context, req provider.Configure
 		clientConfig.Token = config.Token.ValueString()
 	} else {
 		clientConfig.ReadTokenFromFile = true
+	}
+	if config.UseTLS.ValueBool() {
+		clientConfig.UseTLS = true
+	}
+	if !config.ClusterCA.IsNull() {
+		clientConfig.Certs = []byte(config.ClusterCA.ValueString())
 	}
 
 	client, err := ythttp.NewClient(clientConfig)
