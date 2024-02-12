@@ -3,7 +3,7 @@
 page_title: "ytsaurus Provider"
 subcategory: ""
 description: |-
-
+  
 ---
 
 # ytsaurus Provider
@@ -189,3 +189,4 @@ resource "ytsaurus_scheduler_pool" "mrcat_main_pool" {
 ### Optional
 
 - `token` (String) Admin's token. Use YT_TOKEN_PATH environment variable instead.
+- `use_tls` (Boolean) Enable TLS for cluster's connection
