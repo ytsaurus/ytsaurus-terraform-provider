@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -27,11 +28,26 @@ type ytsaurusProvider struct{}
 type ytsaurusProviderModel struct {
 	Cluster types.String `tfsdk:"cluster"`
 	Token   types.String `tfsdk:"token"`
+	UseTLS  types.Bool   `tfsdk:"use_tls"`
 }
+
+const (
+	HTTP  = "http://"
+	HTTPS = "https://"
+)
 
 var (
 	_ provider.Provider = &ytsaurusProvider{}
 )
+
+func cleanUpPrefix(cluster string) string {
+	for _, p := range []string{HTTP, HTTPS} {
+		if strings.HasPrefix(cluster, p) {
+			return cluster[len(p):]
+		}
+	}
+	return cluster
+}
 
 func New() provider.Provider {
 	return &ytsaurusProvider{}
@@ -52,6 +68,10 @@ func (p *ytsaurusProvider) Schema(_ context.Context, _ provider.SchemaRequest, r
 				Optional:    true,
 				Description: "Admin's token. Use YT_TOKEN_PATH environment variable instead.",
 			},
+			"use_tls": schema.BoolAttribute{
+				Optional:    true,
+				Description: "Enable TLS for cluster's connection",
+			},
 		},
 	}
 }
@@ -64,7 +84,8 @@ func (p *ytsaurusProvider) Configure(ctx context.Context, req provider.Configure
 	}
 
 	clientConfig := &yt.Config{
-		Proxy: config.Cluster.ValueString(),
+		Proxy:  cleanUpPrefix(config.Cluster.ValueString()),
+		UseTLS: config.UseTLS.ValueBool() || strings.HasPrefix(config.Cluster.ValueString(), HTTPS),
 	}
 	if !config.Token.IsNull() {
 		clientConfig.Token = config.Token.ValueString()
