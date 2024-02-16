@@ -4,29 +4,24 @@
 ### Example layout
 - **\$HOME/.terraformrc** - Terraform configuration file.
 - **$HOME/tf** - a folder with Terraform files with your infrastructure configuration.
+- **$HOME/tf/providers.tf** - .tf file required providers configuration
 
-### How to configure ~/.terraformrc
-```
- $ cat ~/.terraformrc
-provider_installation {
-  network_mirror {
-    url = "https://terraform-provider.ytsaurus.tech"
-    include = ["registry.terraform.io/ytsaurus/*"]
-  }
-  direct {
-    exclude = ["registry.terraform.io/ytsaurus/*"]
-  }
-
-}
-```
 ### How to download YTsaurus terraform-provider
-Run from your Terroform configuration
+Run from your Terraform configuration
 ```
  $ cd $HOME/tf
+ $ cat providers.tf
+terraform {
+  required_providers {
+    ytsaurus = {
+      source = "terraform-provider.ytsaurus.tech/ytsaurus/ytsaurus"
+    }
+  }
+}
+
  $ terraform init
 
 ```
-
 ## Installation from source code
 ### Prerequirements
 

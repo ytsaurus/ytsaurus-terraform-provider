@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     ytsaurus = {
-      source = "registry.terraform.io/ytsaurus/ytsaurus"
+      source = "terraform-provider.ytsaurus.tech/ytsaurus/ytsaurus"
     }
   }
 }
@@ -20,9 +20,12 @@ variable "GBi" {
 # There are two options for YTsaurus provider configuration:
 # cluster - YTsaurus cluster's fqdn
 # token - Admin's token
+# use_tls - Enable tls
 
 # For security reasons, do not store the token option in .tf file.
 # Instead, the 'token' should be stored in the $HOME/.yt/token file with the appropriate file permissions.
+
+# To enable tls between tf provider and yt cluster use 'use_tls' flag or add 'https://' to 'cluster' fqdn.
 
 provider "ytsaurus" {
   cluster = "<FQDN>"
