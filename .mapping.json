@@ -2,7 +2,6 @@
   "LICENSE":"yt/terraform-provider-ytsaurus/LICENSE",
   "Makefile":"yt/terraform-provider-ytsaurus/Makefile",
   "README.md":"yt/terraform-provider-ytsaurus/README.md",
-  "build_tf_registry_metadata.sh":"yt/terraform-provider-ytsaurus/build_tf_registry_metadata.sh",
   "docs/index.md":"yt/terraform-provider-ytsaurus/docs/index.md",
   "docs/resources/account.md":"yt/terraform-provider-ytsaurus/docs/resources/account.md",
   "docs/resources/group.md":"yt/terraform-provider-ytsaurus/docs/resources/group.md",
