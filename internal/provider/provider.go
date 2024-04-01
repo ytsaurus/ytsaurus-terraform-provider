@@ -26,9 +26,10 @@ import (
 type ytsaurusProvider struct{}
 
 type ytsaurusProviderModel struct {
-	Cluster types.String `tfsdk:"cluster"`
-	Token   types.String `tfsdk:"token"`
-	UseTLS  types.Bool   `tfsdk:"use_tls"`
+	Cluster                         types.String `tfsdk:"cluster"`
+	Token                           types.String `tfsdk:"token"`
+	UseTLS                          types.Bool   `tfsdk:"use_tls"`
+	CertificateAuthorityCertificate types.String `tfsdk:"ca_certificate"`
 }
 
 const (
@@ -72,6 +73,10 @@ func (p *ytsaurusProvider) Schema(_ context.Context, _ provider.SchemaRequest, r
 				Optional:    true,
 				Description: "Enable TLS for cluster's connection",
 			},
+			"ca_certificate": schema.StringAttribute{
+				Optional:    true,
+				Description: "CA certificates in PEM format",
+			},
 		},
 	}
 }
@@ -87,6 +92,11 @@ func (p *ytsaurusProvider) Configure(ctx context.Context, req provider.Configure
 		Proxy:  cleanUpPrefix(config.Cluster.ValueString()),
 		UseTLS: config.UseTLS.ValueBool() || strings.HasPrefix(config.Cluster.ValueString(), HTTPS),
 	}
+
+	if !config.CertificateAuthorityCertificate.IsNull() {
+		clientConfig.CertificateAuthorityData = []byte(config.CertificateAuthorityCertificate.ValueString())
+	}
+
 	if !config.Token.IsNull() {
 		clientConfig.Token = config.Token.ValueString()
 	} else {

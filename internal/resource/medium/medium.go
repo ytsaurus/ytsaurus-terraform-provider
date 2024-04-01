@@ -265,7 +265,7 @@ func (r *mediumResource) Create(ctx context.Context, req resource.CreateRequest,
 		createOptions.Attributes["disk_family_whitelist"] = ytMedium.DiskFamilyWhitelist
 	}
 
-	id, err := r.client.CreateObject(ctx, yt.NodeMedium, createOptions)
+	id, err := r.client.CreateObject(ctx, yt.NodeDomesticMedium, createOptions)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating medium",
