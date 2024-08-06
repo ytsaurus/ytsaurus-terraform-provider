@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -100,7 +101,11 @@ func (p *ytsaurusProvider) Configure(ctx context.Context, req provider.Configure
 	if !config.Token.IsNull() {
 		clientConfig.Token = config.Token.ValueString()
 	} else {
-		clientConfig.ReadTokenFromFile = true
+		if token := os.Getenv("YT_TOKEN"); token != "" {
+			clientConfig.Token = token
+		} else {
+			clientConfig.ReadTokenFromFile = true
+		}
 	}
 
 	client, err := ythttp.NewClient(clientConfig)
