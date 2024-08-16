@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
@@ -20,29 +21,25 @@ func (v schedulerPoolResourceConfigValidator) MarkdownDescription(_ context.Cont
 }
 
 func (v schedulerPoolResourceConfigValidator) ValidateResource(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
-	var config SchedulerPoolModel
-	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	var MaxRunningOperationCount, MaxOperationCount *int64
+
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("max_running_operation_count"), &MaxRunningOperationCount)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("max_operation_count"), &MaxOperationCount)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	ytSchedulerPool, diags := toYTsaurusSchedulerPool(config)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	if ytSchedulerPool.MaxRunningOperationCount != nil &&
-		ytSchedulerPool.MaxOperationCount != nil &&
-		*ytSchedulerPool.MaxRunningOperationCount > *ytSchedulerPool.MaxOperationCount {
+	if MaxRunningOperationCount != nil &&
+		MaxOperationCount != nil &&
+		*MaxRunningOperationCount > *MaxOperationCount {
 		resp.Diagnostics.AddError(
 			"Scheduler pool configuration error",
 			fmt.Sprintf(
 				"%q must be greater that or equal to %q, but %d < %d",
 				"max_operation_count",
 				"max_running_operation_count",
-				*ytSchedulerPool.MaxOperationCount,
-				*ytSchedulerPool.MaxRunningOperationCount,
+				*MaxOperationCount,
+				*MaxRunningOperationCount,
 			),
 		)
 		return
