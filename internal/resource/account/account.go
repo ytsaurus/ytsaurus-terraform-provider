@@ -109,6 +109,31 @@ func toYTsaurusAccount(a AccountModel) (ytsaurus.Account, diag.Diagnostics) {
 	}, diags
 }
 
+// buildAccountAttributes builds a map of attributes for account operations with proper conditional logic
+func buildAccountAttributes(ytAccount ytsaurus.Account, isCreate bool) map[string]interface{} {
+	attributes := map[string]interface{}{
+		"name":            ytAccount.Name,
+		"resource_limits": ytAccount.ResourceLimits,
+	}
+
+	// Only include ACL if it's non-empty
+	if len(ytAccount.ACL) > 0 {
+		attributes["acl"] = ytAccount.ACL
+	}
+
+	// Only include inherit_acl if it's true
+	if ytAccount.InheritACL {
+		attributes["inherit_acl"] = ytAccount.InheritACL
+	}
+
+	// Add terraform_resource flag for create operations
+	if isCreate {
+		attributes["terraform_resource"] = true
+	}
+
+	return attributes
+}
+
 var (
 	_ resource.Resource                = &accountResource{}
 	_ resource.ResourceWithConfigure   = &accountResource{}
@@ -227,18 +252,15 @@ func (r *accountResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	createOptions := &yt.CreateObjectOptions{
-		Attributes: map[string]interface{}{
-			"name":               ytAccount.Name,
-			"acl":                ytAccount.ACL,
-			"inherit_acl":        ytAccount.InheritACL,
-			"resource_limits":    ytAccount.ResourceLimits,
-			"terraform_resource": true,
-		},
-	}
+	// Use the reusable function to build attributes
+	attributes := buildAccountAttributes(ytAccount, true)
 
 	if len(ytAccount.ParentName) > 0 {
-		createOptions.Attributes["parent_name"] = ytAccount.ParentName
+		attributes["parent_name"] = ytAccount.ParentName
+	}
+
+	createOptions := &yt.CreateObjectOptions{
+		Attributes: attributes,
 	}
 
 	id, err := r.client.CreateObject(ctx, yt.NodeAccount, createOptions)
@@ -299,12 +321,7 @@ func (r *accountResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	p := ypath.Path(fmt.Sprintf("#%s", objectID))
-	attributeUpdates := map[string]interface{}{
-		"name":            ytAccount.Name,
-		"acl":             ytAccount.ACL,
-		"resource_limits": ytAccount.ResourceLimits,
-		"inherit_acl":     ytAccount.InheritACL,
-	}
+	attributeUpdates := buildAccountAttributes(ytAccount, false)
 
 	if len(ytAccount.ParentName) > 0 {
 		attributeUpdates["parent_name"] = ytAccount.ParentName
