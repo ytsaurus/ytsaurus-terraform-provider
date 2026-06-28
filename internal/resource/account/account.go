@@ -340,6 +340,23 @@ func (r *accountResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 
 	var ytAccount ytsaurus.Account
+	exists, err := ytsaurus.ObjectExistsByID(ctx, r.client, objectID)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error reading account",
+			fmt.Sprintf(
+				"Could not check account by id %q, unexpected error: %q",
+				objectID,
+				err.Error(),
+			),
+		)
+		return
+	}
+	if !exists {
+		resp.State.RemoveResource(ctx)
+		return
+	}
+
 	if err := ytsaurus.GetObjectByID(ctx, r.client, objectID, &ytAccount); err != nil {
 		resp.Diagnostics.AddError(
 			"Error reading account",

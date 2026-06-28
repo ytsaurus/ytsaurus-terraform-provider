@@ -62,7 +62,7 @@ func (r *objectSchemaResource) copyAttributeToAttribute(ctx context.Context, p y
 	if err := r.client.GetNode(ctx, p.Attr(srcAttr), ptrBuff, nil); err != nil {
 		return err
 	}
-	return r.client.SetNode(ctx, p.Attr(dstAttr), &ptrBuff, nil)
+	return r.client.SetNode(ctx, p.Attr(dstAttr), ptrBuff, nil)
 }
 
 func (r *objectSchemaResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -174,6 +174,23 @@ func (r *objectSchemaResource) Read(ctx context.Context, req resource.ReadReques
 	}
 
 	var ytObjectSchema ytsaurus.ObjectSchema
+	exists, err := ytsaurus.ObjectExistsByID(ctx, r.client, objectID)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error reading schema",
+			fmt.Sprintf(
+				"Could not check schema with id %q, unexpected error: %q",
+				objectID,
+				err.Error(),
+			),
+		)
+		return
+	}
+	if !exists {
+		resp.State.RemoveResource(ctx)
+		return
+	}
+
 	if err := ytsaurus.GetObjectByID(ctx, r.client, objectID, &ytObjectSchema); err != nil {
 		resp.Diagnostics.AddError(
 			"Error reading schema",
