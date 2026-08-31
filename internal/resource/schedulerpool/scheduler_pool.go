@@ -683,6 +683,23 @@ func (r *schedulerPoolResource) Read(ctx context.Context, req resource.ReadReque
 	}
 
 	var ytSchedulerPool ytsaurus.SchedulerPool
+	exists, err := ytsaurus.ObjectExistsByID(ctx, r.client, objectID)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error reading scheduler_pool",
+			fmt.Sprintf(
+				"Could not check scheduler_pool by id %q, unexpected error: %q",
+				objectID,
+				err.Error(),
+			),
+		)
+		return
+	}
+	if !exists {
+		resp.State.RemoveResource(ctx)
+		return
+	}
+
 	if err := ytsaurus.GetObjectByID(ctx, r.client, objectID, &ytSchedulerPool); err != nil {
 		resp.Diagnostics.AddError(
 			"Error reading scheduler_pool",

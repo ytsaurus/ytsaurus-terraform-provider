@@ -290,6 +290,23 @@ func (r *mediumResource) Read(ctx context.Context, req resource.ReadRequest, res
 	}
 
 	var medium ytsaurus.Medium
+	exists, err := ytsaurus.ObjectExistsByID(ctx, r.client, objectID)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error reading medium",
+			fmt.Sprintf(
+				"Could not check medium by id %q, unexpected error: %q",
+				objectID,
+				err.Error(),
+			),
+		)
+		return
+	}
+	if !exists {
+		resp.State.RemoveResource(ctx)
+		return
+	}
+
 	if err := ytsaurus.GetObjectByID(ctx, r.client, objectID, &medium); err != nil {
 		resp.Diagnostics.AddError(
 			"Error reading medium",

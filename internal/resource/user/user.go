@@ -178,6 +178,24 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	}
 
 	var ytUser ytsaurus.User
+	exists, err := ytsaurus.ObjectExistsByID(ctx, r.client, state.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error reading user",
+			fmt.Sprintf(
+				"Could not check user %q by id %q, unexpected error: %q",
+				state.Name.ValueString(),
+				state.ID.ValueString(),
+				err.Error(),
+			),
+		)
+		return
+	}
+	if !exists {
+		resp.State.RemoveResource(ctx)
+		return
+	}
+
 	if err := ytsaurus.GetObjectByID(ctx, r.client, state.ID.ValueString(), &ytUser); err != nil {
 		resp.Diagnostics.AddError(
 			"Error reading user",

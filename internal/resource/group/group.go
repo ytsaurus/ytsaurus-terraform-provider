@@ -177,6 +177,23 @@ func (r *groupResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	}
 
 	var ytGroup ytsaurus.Group
+	exists, err := ytsaurus.ObjectExistsByID(ctx, r.client, objectID)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error reading group",
+			fmt.Sprintf(
+				"Could not check group by id %q, unexpected error: %q",
+				objectID,
+				err.Error(),
+			),
+		)
+		return
+	}
+	if !exists {
+		resp.State.RemoveResource(ctx)
+		return
+	}
+
 	if err := ytsaurus.GetObjectByID(ctx, r.client, objectID, &ytGroup); err != nil {
 		resp.Diagnostics.AddError(
 			"Error reading group",
